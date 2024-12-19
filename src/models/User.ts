@@ -1,11 +1,11 @@
-import { Schema, model, Document, ObjectId } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 
 // Interface for the User model
 interface IUser extends Document {
   username: string;
   email: string;
-  thoughts: ObjectId[];
-  friends: ObjectId[];
+  thoughts: Schema.Types.ObjectId[];
+  friends: Schema.Types.ObjectId[];
   friendCount: number;
 }
 

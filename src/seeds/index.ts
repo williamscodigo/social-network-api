@@ -1,5 +1,6 @@
+import { ObjectId } from 'mongoose';
 import db from '../config/connection.js';
-import { User } from '../models/index.js';
+import { User, Thought } from '../models/index.js';
 import cleanDB from './cleanDB.js';
 
 try {
@@ -19,10 +20,25 @@ try {
     });
 
 
-  // Add students to the collection and await the results
+  // Add users to the collection and await the results
   const userData = await User.create(users);
 
-  //create thoughts and reactions and friends for each user here
+  //create one thought and assign it to the first user
+  const thought = await Thought.create({
+    thoughtText: 'This is a thought',
+    username: userData[0].username,
+  });
+
+  console.log('thought:', thought);
+
+  //add the thought to the user's thoughts array
+  //note this is a reference to the thought model and not the thought itself
+  userData[0].thoughts.push(thought._id as ObjectId);
+
+  //save the user - this will save the thought to the user's thoughts array
+  await userData[0].save();
+
+   //NOTE: can create thoughts and reactions and friends for each user dynamically here or just add them manually in users array above
   //note: can ref noSQL mini project for help with this
   //just log for now
   console.log(userData);
