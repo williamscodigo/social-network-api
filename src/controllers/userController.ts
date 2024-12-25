@@ -49,7 +49,7 @@ export const updateUser = async (req: Request, res: Response) => {
     // Find the user and update it with the data in req.body
     const user = await User.findOneAndUpdate(
       { _id: req.params.userId }, // Find user by _id
-      req.body.email, // The new data to update the user with 
+      req.body.email, // The new data to update the user with - only updating email field 
       { new: true, runValidators: true } // Return the updated user and run validation on update
     );
 
