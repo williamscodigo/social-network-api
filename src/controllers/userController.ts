@@ -13,22 +13,25 @@ import { Request, Response } from 'express';
   }
 
   // Get a single user
-  export const getSingleUser = async (req: Request, res: Response) => {
-    try {
-      const user = await User.findOne({ _id: req.params.userId })
-        .select('-__v');
+export const getSingleUser = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findOne({ _id: req.params.userId })
+      .select('-__v') // Exclude the __v field
+      .populate('thoughts') // Populate thoughts
+      .populate('friends'); // Populate friends
 
-      if (!user) {
-        return res.status(404).json({ message: 'No user with that ID' });
-      }
-
-      res.json(user);
-      return;
-    } catch (err) {
-      res.status(500).json(err);
-      return;
+    if (!user) {
+      return res.status(404).json({ message: 'No user with that ID' });
     }
+
+    res.json(user);
+    return;
+  } catch (err) {
+    res.status(500).json(err);
+    return;
   }
+}
+
 
   // create a new user
   export const createUser = async (req: Request, res: Response) => {
