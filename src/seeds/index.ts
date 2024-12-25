@@ -1,53 +1,113 @@
-import { ObjectId } from 'mongoose';
+import { Types } from 'mongoose';
 import db from '../config/connection.js';
 import { User, Thought } from '../models/index.js';
 import cleanDB from './cleanDB.js';
 
-try {
-  await db();
-  await cleanDB();
+// Helper function to get a random element from an array
+const getRandomItem = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
-  // Create empty array to hold the users
-  const users = [];
+const seedDatabase = async () => {
+  try {
+    await db();
+    await cleanDB();
 
-    users.push({
-      username: 'testUser1',
-      email: 'testUser1@gmail.com',
-    },
-    {
-      username: 'testUser2',
-      email: 'testUser2@gmail.com',
-    });
+    console.info('Database cleaned! 🌱');
 
+    // Create 3 users with explicit createdAt
+    const users = await User.create([
+      { username: 'user1', email: 'user1@example.com' },
+      { username: 'user2', email: 'user2@example.com' },
+      { username: 'user3', email: 'user3@example.com' },
+    ]);
 
-  // Add users to the collection and await the results
-  const userData = await User.create(users);
+    console.log('Users created:', users);
 
-  //create one thought and assign it to the first user
-  const thought = await Thought.create({
-    thoughtText: 'This is a thought',
-    username: userData[0].username,
-  });
+    // Create 2 thoughts and assign to random users
+    const thoughts = await Thought.create([
+      {
+        thoughtText: 'This is the first thought!',
+        username: getRandomItem(users).username,
+        createdAt: new Date(),
+      },
+      {
+        thoughtText: 'This is the second thought!',
+        username: getRandomItem(users).username,
+        createdAt: new Date(),
+      },
+    ]);
 
-  console.log('thought:', thought);
+    console.log('Thoughts created:', thoughts);
 
-  //add the thought to the user's thoughts array
-  //note this is a reference to the thought model and not the thought itself
-  userData[0].thoughts.push(thought._id as ObjectId);
+    // Add thoughts to corresponding users
+    for (const thought of thoughts) {
+      const user = await User.findOne({ username: thought.username });
+      if (user) {
+        user.thoughts.push(thought._id as Types.ObjectId);
+        await user.save();
+      }
+    }
 
-  //save the user - this will save the thought to the user's thoughts array
-  await userData[0].save();
+    console.log('Thoughts associated with users.');
 
-   //NOTE: can create thoughts and reactions and friends for each user dynamically here or just add them manually in users array above
-  //note: can ref noSQL mini project for help with this
-  //just log for now
-  console.log(userData);
+    // Add 3 reactions to random thoughts
+    const reactions = [
+      {
+        reactionBody: 'Great thought!',
+        username: getRandomItem(users).username,
+        createdAt: new Date(),
+      },
+      {
+        reactionBody: 'Interesting idea!',
+        username: getRandomItem(users).username,
+        createdAt: new Date(),
+      },
+      {
+        reactionBody: 'I totally agree!',
+        username: getRandomItem(users).username,
+        createdAt: new Date(),
+      },
+    ];
 
-  // Log out the seed data to indicate what should appear in the database
-  console.table(users);
-  console.info('Seeding complete! 🌱');
-  process.exit(0);
-} catch (error) {
-  console.error('Error seeding database:', error);
-  process.exit(1);
-}
+    for (const reaction of reactions) {
+      const thought = getRandomItem(thoughts);
+      thought.reactions.push({
+        reactionId: new Types.ObjectId(),
+        reactionBody: reaction.reactionBody,
+        username: reaction.username,
+        createdAt: reaction.createdAt,
+      } as any); // Use `any` here to bypass strict type checking
+      await thought.save();
+    }
+
+    console.log('Reactions added to thoughts.');
+
+    // Set friendship logic
+    const user1 = users.find((u) => u.username === 'user1');
+    const user2 = users.find((u) => u.username === 'user2');
+    const user3 = users.find((u) => u.username === 'user3');
+
+    if (user1 && user2 && user3) {
+      // user1 is friends with user2 and user3
+      user1.friends.push(user2._id as Types.ObjectId, user3._id as Types.ObjectId);
+      await user1.save();
+
+      // user2 is friends with user1
+      user2.friends.push(user1._id as Types.ObjectId);
+      await user2.save();
+
+      // user3 has no friends
+      console.log('Friendships set:');
+      console.log(`user1 is friends with ${user1.friends.length} users.`);
+      console.log(`user2 is friends with ${user2.friends.length} users.`);
+      console.log(`user3 has ${user3.friends.length} friends.`);
+    }
+
+    console.log('Seeding complete! 🌱');
+    process.exit(0);
+  } catch (error) {
+    console.error('Error seeding database:', error);
+    process.exit(1);
+  }
+};
+
+seedDatabase();

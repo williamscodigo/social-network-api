@@ -1,4 +1,4 @@
-import User from './User.js';
-import Thought from './Thought.js';
+import User, { IUser } from './User.js';
+import Thought , { IThought, IReactions }from './Thought.js';
 
-export { User, Thought };
+export { User, IUser, Thought, IThought, IReactions };
