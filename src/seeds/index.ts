@@ -23,24 +23,20 @@ const seedDatabase = async () => {
     console.log('Users created:', users);
 
     // Create 2 thoughts and assign to random users
-    const thoughts = await Thought.create([
-      {
-        thoughtText: 'This is the first thought!',
-        username: getRandomItem(users).username,
+    const thoughts = await Thought.create(
+      users.map((user) => ({
+        thoughtText: `${user.username}'s thought!`,
+        username: user.username,
+        userId: user._id, // Assign the user's _id as the userId for the thought
         createdAt: new Date(),
-      },
-      {
-        thoughtText: 'This is the second thought!',
-        username: getRandomItem(users).username,
-        createdAt: new Date(),
-      },
-    ]);
+      }))
+    );
 
     console.log('Thoughts created:', thoughts);
 
     // Add thoughts to corresponding users
     for (const thought of thoughts) {
-      const user = await User.findOne({ username: thought.username });
+      const user = await User.findOne({ _id: thought.userId });
       if (user) {
         user.thoughts.push(thought._id as Types.ObjectId);
         await user.save();
@@ -111,3 +107,7 @@ const seedDatabase = async () => {
 };
 
 seedDatabase();
+
+
+//new userId: 
+//friend userId: 

@@ -11,7 +11,8 @@ export interface IReactions extends Document {
 // Interface for the Thought schema
 export interface IThought extends Document {
   thoughtText: string;
-  username: string; // The user that created this thought - connected to the User model (instead of using id as a reference? should't this be id?)
+  username: string; 
+  userId: Types.ObjectId; // The user that created this thought - connected to the User model
   reactions: IReactions[];
   reactionCount: number;
   createdAt: Date;
@@ -58,6 +59,11 @@ const thoughtSchema = new Schema<IThought>(
     username: {
       type: String,
       required: true,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: 'User', // The user that created this thought - connected to the User model
     },
     createdAt: {
       type: Date,
