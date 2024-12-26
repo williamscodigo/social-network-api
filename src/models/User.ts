@@ -43,7 +43,7 @@ const userSchema = new Schema<IUser>(
       virtuals: true,
       versionKey: false, // Exclude `__v` field from the JSON response
     },
-    id: false,
+    id: false, // Disallow the use of `id` as a virtual
   }
 );
 
@@ -56,26 +56,3 @@ userSchema.virtual('friendCount').get(function (this: IUser) {
 const User = model<IUser>('User', userSchema);
 
 export default User;
-
-
-
-
-
-
-
-
-
-
-/*
-NOTES on above: versionKey: false, // Exclode `__v` field from the JSON response
-
-Setting versionKey: false in the schema configuration removes __v from the JSON response.
-
-The __v field will still exist in the database but won't be included in the output when querying documents.
-
-The __v field in Mongoose is a version key that is used by Mongoose for internal purposes, specifically for tracking document versions 
-
-Mongoose increments the __v field whenever you perform an update operation on a document.
-
-This mechanism helps Mongoose prevent conflicting updates to a document in concurrent environments.
-*/

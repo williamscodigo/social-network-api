@@ -16,7 +16,6 @@ export const getUsers = async (_req: Request, res: Response) => {
 export const getSingleUser = async (req: Request, res: Response) => {
   try {
     const user = await User.findOne({ _id: req.params.userId })
-      .select('-__v') // Exclude the __v field
       .populate('thoughts') // Populate thoughts
       .populate('friends'); // Populate friends
 
@@ -35,7 +34,10 @@ export const getSingleUser = async (req: Request, res: Response) => {
 // Create a new user
 export const createUser = async (req: Request, res: Response) => {
   try {
-    const user = await User.create(req.body);
+    const user = await User.create({
+      username: req.body.username,
+      email: req.body.email,
+    });
     res.json(user);
   } catch (err) {
     res.status(500).json(err);
@@ -49,7 +51,7 @@ export const updateUser = async (req: Request, res: Response) => {
     // Find the user and update it with the data in req.body
     const user = await User.findOneAndUpdate(
       { _id: req.params.userId }, // Find user by _id
-      req.body.email, // The new data to update the user with - only updating email field 
+      {email: req.body.email}, // The new data to update the user with - only updating email field 
       { new: true, runValidators: true } // Return the updated user and run validation on update
     );
 

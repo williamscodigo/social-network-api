@@ -27,8 +27,6 @@ const seedDatabase = async () => {
       users.map((user) => ({
         thoughtText: `${user.username}'s thought!`,
         username: user.username,
-        userId: user._id, // Assign the user's _id as the userId for the thought
-        createdAt: new Date(),
       }))
     );
 
@@ -36,7 +34,7 @@ const seedDatabase = async () => {
 
     // Add thoughts to corresponding users
     for (const thought of thoughts) {
-      const user = await User.findOne({ _id: thought.userId });
+      const user = await User.findOne({ username: thought.username });
       if (user) {
         user.thoughts.push(thought._id as Types.ObjectId);
         await user.save();
@@ -50,27 +48,22 @@ const seedDatabase = async () => {
       {
         reactionBody: 'Great thought!',
         username: getRandomItem(users).username,
-        createdAt: new Date(),
       },
       {
         reactionBody: 'Interesting idea!',
         username: getRandomItem(users).username,
-        createdAt: new Date(),
       },
       {
         reactionBody: 'I totally agree!',
         username: getRandomItem(users).username,
-        createdAt: new Date(),
       },
     ];
 
     for (const reaction of reactions) {
       const thought = getRandomItem(thoughts);
       thought.reactions.push({
-        reactionId: new Types.ObjectId(),
         reactionBody: reaction.reactionBody,
         username: reaction.username,
-        createdAt: reaction.createdAt,
       } as any); // Use `any` here to bypass strict type checking
       await thought.save();
     }
@@ -108,6 +101,3 @@ const seedDatabase = async () => {
 
 seedDatabase();
 
-
-//new userId: 
-//friend userId: 

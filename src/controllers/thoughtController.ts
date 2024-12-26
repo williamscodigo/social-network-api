@@ -33,10 +33,13 @@ export const getSingleThought = async (req: Request, res: Response) => {
 // Create a new thought and associate it with the user's thoughts array
 export const createThought = async (req: Request, res: Response) => {
   try {
-    const thought = await Thought.create(req.body);
+    const thought = await Thought.create({
+      thoughtText: req.body.thoughtText,
+      username: req.body.username,
+    });
 
-    // Find the user by userId and push the new thought's _id to their thoughts array
-    const user = await User.findById(req.body.userId);
+    // Find the user by username and push the new thought's _id to their thoughts array
+    const user = await User.findOne({username: req.body.username});
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -124,10 +127,8 @@ export const addReaction = async (req: Request, res: Response) => {
     }
 
     thought.reactions.push({
-      reactionId: new Types.ObjectId(),
       reactionBody: req.body.reactionBody,
       username: req.body.username,
-      createdAt: new Date(),
     } as any);
     await thought.save();
 
